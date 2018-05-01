@@ -41,6 +41,7 @@ guessing phase. Each player can guess at any time (with their number of guesses 
 server).
 
 **Once all players have either:**
+
      * Correctly guessed the code,
      * Reached their maximum guesses – 10,
        or
