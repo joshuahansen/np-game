@@ -40,11 +40,11 @@ The server then generates a random code with X unique digits. The game then ente
 guessing phase. Each player can guess at any time (with their number of guesses tracked by the
 server).
 
-    **Once all players have either:**
-        * Correctly guessed the code,
-        * Reached their maximum guesses – 10,
-        or
-        * Chosen to forfeit by pressing f (giving them a guess count of 11)
+**Once all players have either:**
+     * Correctly guessed the code,
+     * Reached their maximum guesses – 10,
+       or
+     * Chosen to forfeit by pressing f (giving them a guess count of 11)
         
 The server announces to all clients the number of guesses for each client (ranked from lowest to
 highest). Players can then choose to play again (p), or quit (q). The players that chose to play
