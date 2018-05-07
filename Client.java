@@ -33,17 +33,23 @@ class Client
                         new InputStreamReader(serverSocket.getInputStream()));
             PrintWriter clientOutput = new PrintWriter(serverSocket.getOutputStream(), true);
 
-            System.out.println("Send server you name:");
+            System.out.println(getServerResponse(serverInput));
             clientOutput.println(getUserInput(keyboardInput));
+            System.out.println(getServerResponse(serverInput));
     
             String serverResponse = getServerResponse(serverInput);
-            if(serverResponse.equals("first player"))
+            System.out.println(serverResponse);
+            if(serverResponse.equals("Please enter a code length"))
             {
                 setCodeLength(keyboardInput, clientOutput);
             }
-
-            while(!"quit".equals(getServerResponse(serverInput)))
+            clientOutput.println(getUserInput(keyboardInput));
+            String sr = getServerResponse(serverInput);
+            while(!"quit".equals(sr))
             {
+                displayServerResponse(sr);
+                clientOutput.println(getUserInput(keyboardInput));
+                sr = getServerResponse(serverInput);
             }   
 
 
