@@ -32,34 +32,54 @@ class Client
             BufferedReader serverInput = new BufferedReader(
                         new InputStreamReader(serverSocket.getInputStream()));
             PrintWriter clientOutput = new PrintWriter(serverSocket.getOutputStream(), true);
-
-            System.out.println(getServerResponse(serverInput));
-            clientOutput.println(getUserInput(keyboardInput));
-            System.out.println(getServerResponse(serverInput));
-    
-            String serverResponse = getServerResponse(serverInput);
-            System.out.println(serverResponse);
-            if(serverResponse.equals("Please enter a code length"))
+            
+            String sr = "";
+            while(!sr.equals("close"))
             {
-                setCodeLength(keyboardInput, clientOutput);
-            }
-            clientOutput.println(getUserInput(keyboardInput));
-            String sr = getServerResponse(serverInput);
-            while(!"quit".equals(sr))
-            {
-                displayServerResponse(sr);
+                System.out.println(getServerResponse(serverInput));
                 clientOutput.println(getUserInput(keyboardInput));
+                System.out.println(getServerResponse(serverInput));
+    
                 sr = getServerResponse(serverInput);
-            }   
-
-
-
+                System.out.println(sr);
+                if(sr.equals("Please enter a code length"))
+                {
+                    setCodeLength(keyboardInput, clientOutput);
+                }
+                guess(keyboardInput, clientOutput);
+                sr = getServerResponse(serverInput);
+                while(!"End Game".equals(sr))
+                {
+                    boolean response = displayServerResponse(sr);
+                    if(!response)
+                    {
+                        guess(keyboardInput, clientOutput);
+                    }
+                    sr = getServerResponse(serverInput);
+                }   
+                sr = getServerResponse(serverInput);
+                System.out.println(sr);
+                clientOutput.println(getUserInput(keyboardInput));
+                
+            }
             keyboardInput.close();
         }catch(IOException ex)
         {
             System.out.println("Failed to close connection: " + ex);
         }
     }
+    /**
+    * @param keyboardInput : BufferedReader; get input from keyboard.
+    * @param clientOutput : PrintWriter; sends output to the server.
+    * Validate the user input to make sure it only contains digits.
+    */
+    private static void guess(BufferedReader keyboardInput, PrintWriter clientOutput) throws IOException
+    {
+        System.out.print("Enter Guess: ");
+        String userGuess = getUserInput(keyboardInput);
+        userGuess = getUserInput(keyboardInput);
+        clientOutput.println(userGuess);
+    }        
     /**
     * Connect to the server.
     * @return Socket; Return socket of server connection.
@@ -91,20 +111,26 @@ class Client
     */
     public static boolean displayServerResponse(String serverResponse)
     {
-        String response[] = serverResponse.split(",");
-        if(response.length == 2 && response[0] == "Correct")
+        String[] response = serverResponse.split(",");
+        if(response.length == 2 && response[0].equals("Correct"))
         {
             System.out.println("Correct!");
             System.out.println("Guesses: " + response[1]);
             return true;
         }
-        else if(response.length == 2 && response[0] == "Incorrect")
+        else if(response.length == 2 && response[0].equals("Incorrect"))
         {
             System.out.println("Incorrect Guess. Out of guesses");
             System.out.println("Guesses: " + response[1]);
             return true;
         }
-        else if(response.length == 3 && response[0] == "Incorrect")
+        else if(response.length == 2 && response[0].equals("Game Forfeit"))
+        {
+            System.out.println("Game Forfeit");
+            System.out.println("Guesses: " + response[1]);
+            return true;
+        }
+        else if(response.length == 3 && response[0].equals("Incorrect"))
         {
             System.out.println("Incorrect Guess");
             System.out.println("Correct Positions: " + response[1]);
@@ -112,7 +138,10 @@ class Client
             return false;
         }
         else
+        {
+            System.out.println(serverResponse);
             return false;   
+        }
     }
 
     /**
