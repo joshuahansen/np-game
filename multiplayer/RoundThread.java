@@ -26,7 +26,15 @@ class RoundThread extends Thread
         while(!endRound)
         {
             msg.output = "get code length";
-            players.get(0).notify();
+            synchronized(players.get(0))
+            {
+                try{
+                    players.get(0).notify();
+                }catch(InterruptedException e)
+                {
+                    System.out.println("Interrupt error: " + e);
+                }
+            }
             synchronized(this)
             {
                 try{
@@ -46,7 +54,15 @@ class RoundThread extends Thread
 
             for(PlayerThread player : players)
             {
-                player.notify();
+                synchronized(player)
+                {
+                    try{
+                        player.notify();
+                    }catch(InterruptedException e)
+                    {
+                        System.out.println("Interrupt error: " + e);
+                    }
+                }
                 synchronized(this)
                 {
                    try{
@@ -92,14 +108,31 @@ class RoundThread extends Thread
                         player.score++;
                         msg.output = "Incorrect,"+newGuess.correct + "," + newGuess.incorrect    ;
                     }
-                    player.notify();
+                    synchronized(player)
+                    {
+                        try{
+                            player.notify();
+                        }catch(InterruptedException e)
+                        {
+                            System.out.println("Interrupt error: " + e);
+                        }
+                    }
                 }
             }
             for(PlayerThread player : players)
             {
                 msg.output = "End Game";
-                player.notify();
+                synchronized(player)
+                {
+                    try{
+                        player.notify();
+                    }catch(InterruptedException e)
+                    {
+                        System.out.println("Interrupt error: " + e);
+                    }
+                }
             }
+            endRound = true;
         }
     }
     /**
@@ -146,11 +179,6 @@ class RoundThread extends Thread
                 newGuess.incorrect++;
         }
         return newGuess;
-    }
-    class GuessResponse
-    {
-        public int correct;
-        public int incorrect;
     }
 }
 
