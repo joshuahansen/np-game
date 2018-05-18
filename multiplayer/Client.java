@@ -1,4 +1,4 @@
-package multiplayer;
+package singlePlayer;
 
 import java.io.*;
 import java.net.*;
@@ -25,9 +25,10 @@ class Client
     {
         try {
             System.out.println("==========Welcome To Code Breaker==========");
-
+            //connect to server
             Socket serverSocket = connectToServer();
-
+        
+            //create buffers for input output
             InputStream keyboardInputStream = System.in;
             BufferedReader keyboardInput = new BufferedReader(
                       new InputStreamReader(keyboardInputStream));
@@ -36,22 +37,24 @@ class Client
             PrintWriter clientOutput = new PrintWriter(serverSocket.getOutputStream(), true);
             
             String sr = "";
+            //loop while user wishes to continue playing
             while(!sr.equals("close"))
             {
+                //get user name propmts and send response
                 System.out.println(getServerResponse(serverInput));
                 clientOutput.println(getUserInput(keyboardInput));
                 System.out.println(getServerResponse(serverInput));
     
                 sr = getServerResponse(serverInput);
                 System.out.println(sr);
+                //set code length
                 if(sr.equals("Please enter a code length"))
                 {
                     setCodeLength(keyboardInput, clientOutput);
                 }
                 guess(keyboardInput, clientOutput);
                 sr = getServerResponse(serverInput);
-                System.out.println(sr);
-                sr = getServerResponse(serverInput);
+                //loop getting user guesses while valid turns
                 while(!"End Game".equals(sr))
                 {
                     boolean response = displayServerResponse(sr);
@@ -61,6 +64,7 @@ class Client
                     }
                     sr = getServerResponse(serverInput);
                 }   
+                //get play agian/quit prompt
                 sr = getServerResponse(serverInput);
                 System.out.println(sr);
                 clientOutput.println(getUserInput(keyboardInput));

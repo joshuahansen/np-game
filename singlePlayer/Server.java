@@ -20,7 +20,8 @@ class Server
     public static void main(String[] args)
     {
         
-        try {
+       try {
+            //set up logging to file and console
             SimpleFormatter formatter = new SimpleFormatter();
             Logger gameLog = Logger.getLogger("gameLog");
             Logger commLog = Logger.getLogger("communicationLog");
@@ -32,14 +33,17 @@ class Server
             serverfh.setFormatter(formatter);
             gameLog.setLevel(Level.FINE);
             commLog.setLevel(Level.FINE);
-
+    
+            //get incoming client connection
             Socket clientSocket = serverSocket(commLog);
+            //set up buffers to send data
             PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
             InputStream clientInputStream = clientSocket.getInputStream();
             BufferedReader input = new BufferedReader(new InputStreamReader(clientInputStream));
                 
             String inputLine;
             boolean close = false;
+            //loop while user wants to play
             while(!close)
             {
                 output.println("Please Enter your name: ");
@@ -64,7 +68,7 @@ class Server
 
                 int guessCount = 1;
                 gameLog.log(Level.INFO, "Code: " + Arrays.toString(code));
-                    
+                //loop while user has guesses
                 while(!(inputLine = input.readLine()).equals("f"))
                 {
                     gameLog.log(Level.INFO, "GUESS: " + inputLine);
@@ -100,18 +104,20 @@ class Server
                         ++guessCount;
                     }
                 }
+                //proccess forfeit
                 if(inputLine.equals("f"))
                 {
                     gameLog.log(Level.INFO, "Game Forfeit score 11");
                     output.println("Game Forfeit,"+11);
                 }
-
+                //ask user if they want to play again
                 output.println("End Game");
                 commLog.log(Level.INFO, "end game sent to client");
                 output.println("Do you wish to play again? (p)-play/(q)-quit");
                 commLog.log(Level.INFO, "Prompt to play again sent to client");
                 inputLine = input.readLine();
                 commLog.log(Level.INFO, "Response received from client");
+                //proccess results
                 if(inputLine.equals("q"))
                 {
                     output.println("close");
@@ -171,6 +177,7 @@ class Server
         }
         return code;
     }
+    //chech if digit is in the code
     private static boolean inCode(int digit, int[] code, Logger gameLog)
     {
         gameLog.log(Level.INFO, "Make sure digit is unique in the code");
@@ -181,6 +188,7 @@ class Server
         }
         return false;
     }
+    //chueck if the guess matches the code
     private static GuessResponse match(int[] code, String guess, Logger gameLog)
     {
         gameLog.log(Level.INFO, "check if guess matches code");
@@ -197,7 +205,7 @@ class Server
         return newGuess;
     }
 }  
-
+//global class to handle guess position results
 class GuessResponse
 {
     public int correct = 0;

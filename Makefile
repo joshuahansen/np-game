@@ -9,7 +9,7 @@ JVM = java
 default: .java.class
 
 clean:
-	$(RM) *.class *.log
+	$(RM) singlePlayer/*.class multiplayer/*.class *.log
 
 MPserver:
 	$(JVM) multiplayer.Server
