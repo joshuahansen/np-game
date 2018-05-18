@@ -6,7 +6,7 @@ import java.util.*;
 import java.lang.*;
 import java.util.zip.*;
 import java.util.logging.*;
-
+//player thread handles single client
 class PlayerThread extends Thread
 {
     private Socket clientSocket;
@@ -15,7 +15,7 @@ class PlayerThread extends Thread
     public int score;
     RoundThread round;
     GameMsg msg;
-
+//constructor to set up thread
     public PlayerThread(Socket socket, Logger commLog, GameMsg msg)
     {
         this.clientSocket = socket;
@@ -23,14 +23,17 @@ class PlayerThread extends Thread
         this.score = 1;
         this.msg = msg;
     }
+    //add RoundThread to call notify on
     public void addRoundThread(RoundThread thread)
     {
         this.round = thread;
     }
+    //start Thread
     @Override
     public void run()
     {
         try{
+            //buffers to send and recieve data from clinet
             PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
             InputStream clientInputStream = clientSocket.getInputStream();
             BufferedReader input = new BufferedReader(new InputStreamReader(clientInputStream));
@@ -46,6 +49,7 @@ class PlayerThread extends Thread
             output.println("Welcome " + this.name);
             commLog.log(Level.INFO, "Welcome sent to client");
             boolean close = false;
+            //loop while client wishes to play
             while(!close)
             {
                 synchronized(this)
@@ -79,6 +83,7 @@ class PlayerThread extends Thread
                         round.notify();
                     }
                 }
+                //loop while guessing 
                 while(!(inputLine = input.readLine()).equals("f"))
                 {
                     receiveSend(inputLine, commLog, output);
@@ -87,6 +92,7 @@ class PlayerThread extends Thread
                 {
                     receiveSend(inputLine, commLog, output);
                 }
+                //send play again/ quit prompt and handle response
                 output.println("End Game");
                 commLog.log(Level.INFO, "end game sent to client");
                 output.println("Do you wish to play again? (p)-play/(q)-quit");
@@ -111,7 +117,7 @@ class PlayerThread extends Thread
             System.out.println("Input output exception: " + ioe);
         }
     }
-    
+    //send and receive data between thread and client and notify Round thread when data has been recieved
     public void receiveSend(String inputLine, Logger commLog, PrintWriter output)
     {
         msg.input = inputLine;

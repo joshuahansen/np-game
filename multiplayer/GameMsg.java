@@ -1,5 +1,5 @@
 package multiplayer;
-
+//Global class handles messages between threads
 class GameMsg
 {
     public String input;

@@ -6,18 +6,19 @@ import java.util.*;
 import java.lang.*;
 import java.util.zip.*;
 import java.util.logging.*;
-
+//round thread handels game logic
 class RoundThread extends Thread
 {
     private Logger gameLog;
     private List<PlayerThread> players;
     GameMsg msg;
-
+    //constructor to set up thread
     public RoundThread(List<PlayerThread> players, Logger gameLog, GameMsg msg)
     {
         this.players = players;
         this.gameLog = gameLog;
         this.msg = msg;
+        //add this thread to player threads
         for(PlayerThread player : players)
         {
             player.addRoundThread(this);
@@ -26,9 +27,11 @@ class RoundThread extends Thread
     @Override
     public void run()
     {
+        //loop while round is playing
         boolean endRound = false;
         while(!endRound)
         {
+            //ask player 1 for the code length
             msg.output = "get code length";
             synchronized(players.get(0))
             {
@@ -45,12 +48,13 @@ class RoundThread extends Thread
             }
             int codeLength = Integer.parseInt(msg.input);
             gameLog.log(Level.INFO, "Code length: " + codeLength);
-
+            //generate the code
             int code[] = generateCode(codeLength, gameLog);
             gameLog.log(Level.INFO, "Code generated");
 
             gameLog.log(Level.INFO, "Code: " + Arrays.toString(code));
 
+            //for each plaer loop getting there guesses
             for(PlayerThread player : players)
             {
                 synchronized(player)
@@ -66,7 +70,7 @@ class RoundThread extends Thread
                        System.out.println("Interrupt error: " + e);
                    }
                 }
-
+                //handle clients guess
                 if(msg.input.equals("f"))
                 {
                     gameLog.log(Level.INFO, "Game Forfeit score 11");
@@ -102,12 +106,14 @@ class RoundThread extends Thread
                         player.score++;
                         msg.output = "Incorrect,"+newGuess.correct + "," + newGuess.incorrect    ;
                     }
+                    //notify player thread od the game response
                     synchronized(player)
                     {
                         player.notify();
                     }
                 }
             }
+            //loop telling each player the game is over
             for(PlayerThread player : players)
             {
                 msg.output = "End Game";
@@ -139,6 +145,7 @@ class RoundThread extends Thread
         }
         return code;
     }
+    //check if digit is in the code
     private boolean inCode(int digit, int[] code, Logger gameLog)
     {
         gameLog.log(Level.INFO, "Make sure digit is unique in the code");
@@ -149,6 +156,7 @@ class RoundThread extends Thread
         }
         return false;
     }
+    //check if guess matches the code
     private GuessResponse match(int[] code, String guess, Logger gameLog)
     {
         gameLog.log(Level.INFO, "check if guess matches code");

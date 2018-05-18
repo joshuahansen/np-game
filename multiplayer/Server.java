@@ -23,6 +23,7 @@ class Server
     {
         LinkedList<PlayerThread> lobbyQueue = new LinkedList<PlayerThread>();
         try {
+            //set up loggers for game and communication
             SimpleFormatter formatter = new SimpleFormatter();
             Logger gameLog = Logger.getLogger("gameLog");
             Logger commLog = Logger.getLogger("communicationLog");
@@ -36,22 +37,28 @@ class Server
             commLog.setLevel(Level.FINE);
             
             int serverPort = 19185;
-
+            //start server socket
             ServerSocket ss = new ServerSocket(serverPort);
 
-            boolean queuing = true;            
+            boolean queuing = true;
+            //continuously loop to allow clients to connect            
             while(queuing)
             {
                 Socket clientSocket = connect(ss, commLog);
+                //start a new thread to handle client
                 PlayerThread newPlayer = new PlayerThread(clientSocket, commLog, msg);
+                //add to lobbyQueue
                 lobbyQueue.add(newPlayer);
                 newPlayer.start();
-                if(lobbyQueue.size() >= 3) //change to 3 after testing
+                //start game once 3 players have connected
+                if(lobbyQueue.size() >= 3)
                 {
                     players.clear();
+                    //get first 3 players
                     players.add(lobbyQueue.poll());
                     players.add(lobbyQueue.poll());
                     players.add(lobbyQueue.poll());
+                    //start round
                     RoundThread round = new RoundThread(players, gameLog, msg);
                     round.start();
                 }
