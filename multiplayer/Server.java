@@ -98,7 +98,7 @@ class Server
                         ++guessCount;
                     }
                 }
-                if(inputLine.equals("f")
+                if(inputLine.equals("f"))
                 {
                     gameLog.log(Level.INFO, "Game Forfeit score 11");
                     output.println("Game Forfeit,"+11);
@@ -107,11 +107,19 @@ class Server
                 output.println("End Game");
                 commLog.log(Level.INFO, "end game sent to client");
                 output.println("Do you wish to play again? (p)-play/(q)-quit");
+                commLog.log(Level.INFO, "Prompt to play again sent to client");
                 inputLine = input.readLine();
+                commLog.log(Level.INFO, "Response received from client");
                 if(inputLine.equals("q"))
                 {
                     output.println("close");
+                    commLog.log(Level.INFO, "close connection sent to client");
                     close = true;
+                }
+                else
+                {
+                    output.println("play");
+                    commLog.log(Level.INFO, "Keep connection alive and play again");
                 }
             }
             clientSocket.close();
@@ -121,6 +129,9 @@ class Server
         }catch(IOException ex)
         {
             System.out.println("Input output error: " + ex);
+        }catch(NumberFormatException nfe)
+        {
+            System.out.println("Number Format Exception: " + nfe);
         }
     }
 

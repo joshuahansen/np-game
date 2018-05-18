@@ -60,7 +60,7 @@ class Client
                 sr = getServerResponse(serverInput);
                 System.out.println(sr);
                 clientOutput.println(getUserInput(keyboardInput));
-                
+                sr = getServerResponse(serverInput);
             }
             keyboardInput.close();
         }catch(IOException ex)
