@@ -12,14 +12,16 @@ class RoundThread extends Thread
     private Logger gameLog;
     private List<PlayerThread> players;
     GameMsg msg;
-    Object lock;
 
-    public RoundThread(List<PlayerThread> players, Logger gameLog, GameMsg msg, Object lock)
+    public RoundThread(List<PlayerThread> players, Logger gameLog, GameMsg msg)
     {
         this.players = players;
         this.gameLog = gameLog;
         this.msg = msg;
-        this.lock = lock;
+        for(PlayerThread player : players)
+        {
+            player.addRoundThread(this);
+        }
     }
     @Override
     public void run()
@@ -32,10 +34,10 @@ class RoundThread extends Thread
             {
                 players.get(0).notify();
             }
-            synchronized(players.get(0))
+            synchronized(this)
             {
                 try{
-                    players.get(0).wait();
+                    this.wait();
                 }catch(InterruptedException e)
                 {
                     System.out.println("Interrupt error: " + e);
@@ -55,10 +57,10 @@ class RoundThread extends Thread
                 {
                     player.notify();
                 }
-                synchronized(player)
+                synchronized(this)
                 {
                    try{
-                       player.wait();
+                       this.wait();
                    }catch(InterruptedException e)
                    {
                        System.out.println("Interrupt error: " + e);

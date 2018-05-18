@@ -6,19 +6,10 @@ JVM = java
 .java.class:
 	$(JC) singlePlayer/*.java multiplayer/*.java
 
-PACKAGES := \
-	. \
-	singlePlayer \
-	multiplayer \
-
-CLASSES := $(shell find $(PACKAGES) -type f -name '*.java')
-
-default: classes
-
-classes: $(CLASSES:.java=.class)
+default: .java.class
 
 clean:
-	$(RM) singlePlayer/*.class singlePlayer/*.log multiplayer/*.class multiplayer/*.log
+	$(RM) *.class *.log
 
 MPserver:
 	$(JVM) multiplayer.Server

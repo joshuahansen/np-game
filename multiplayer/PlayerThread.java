@@ -13,16 +13,19 @@ class PlayerThread extends Thread
     private Logger commLog;
     public String name;
     public int score;
+    RoundThread round;
     GameMsg msg;
-    Object lock;
 
-    public PlayerThread(Socket socket, Logger commLog, GameMsg msg, Object lock)
+    public PlayerThread(Socket socket, Logger commLog, GameMsg msg)
     {
         this.clientSocket = socket;
         this.commLog = commLog;
         this.score = 1;
         this.msg = msg;
-        this.lock = lock;
+    }
+    public void addRoundThread(RoundThread thread)
+    {
+        this.round = thread;
     }
     @Override
     public void run()
@@ -69,7 +72,11 @@ class PlayerThread extends Thread
                         {
                             System.out.println("Interrupt error: " + e);
                         }
-                        this.notify();
+                        round.notify();
+                    }
+                    synchronized(round)
+                    {
+                        round.notify();
                     }
                 }
                 while(!(inputLine = input.readLine()).equals("f"))
@@ -117,8 +124,12 @@ class PlayerThread extends Thread
             {
                 System.out.println("Interrupt error: " + e);
             }
-            this.notify();
         }
+        synchronized(round)
+        {
+            round.notify();
+        }
+        
         output.println(msg.output);
         commLog.log(Level.INFO, "Game result sent to client");
         synchronized(this)
