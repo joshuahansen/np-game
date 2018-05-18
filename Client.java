@@ -77,7 +77,6 @@ class Client
     {
         System.out.print("Enter Guess: ");
         String userGuess = getUserInput(keyboardInput);
-        userGuess = getUserInput(keyboardInput);
         clientOutput.println(userGuess);
     }        
     /**

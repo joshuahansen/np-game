@@ -31,91 +31,90 @@ class Server
             gameLog.setLevel(Level.FINE);
             commLog.setLevel(Level.FINE);
 
-            while(true)
-            {
-                Socket clientSocket = serverSocket(commLog);
-                PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
-                InputStream clientInputStream = clientSocket.getInputStream();
-                BufferedReader input = new BufferedReader(new InputStreamReader(clientInputStream));
+            Socket clientSocket = serverSocket(commLog);
+            PrintWriter output = new PrintWriter(clientSocket.getOutputStream(), true);
+            InputStream clientInputStream = clientSocket.getInputStream();
+            BufferedReader input = new BufferedReader(new InputStreamReader(clientInputStream));
                 
-                String inputLine;
-                boolean close = false;
-                do
-                {
-                    output.println("Please Enter your name: ");
-                    commLog.log(Level.INFO, "Name promt sent to client");
+            String inputLine;
+            boolean close = false;
+            while(!close)
+            {
+                output.println("Please Enter your name: ");
+                commLog.log(Level.INFO, "Name promt sent to client");
                     
-                    String clientName = input.readLine();
-                    commLog.log(Level.INFO, "Data recieved from client");
+                String clientName = input.readLine();
+                commLog.log(Level.INFO, "Data recieved from client");
                     
-                    output.println("Welcome " + clientName);
-                    commLog.log(Level.INFO, "Welcome sent to client");
+                output.println("Welcome " + clientName);
+                commLog.log(Level.INFO, "Welcome sent to client");
                     
-                    output.println("Please enter a code length");
-                    commLog.log(Level.INFO, "code length promt sent to client");
+                output.println("Please enter a code length");
+                commLog.log(Level.INFO, "code length promt sent to client");
                     
-                    int codeLength = Integer.parseInt(input.readLine());
-                    commLog.log(Level.INFO, "Data recieved from client");
-                    gameLog.log(Level.INFO, "Code length: " + codeLength);
+                int codeLength = Integer.parseInt(input.readLine());
+                commLog.log(Level.INFO, "Data recieved from client");
+                gameLog.log(Level.INFO, "Code length: " + codeLength);
                     
-                    int code[] = generateCode(codeLength, gameLog);
-                    gameLog.log(Level.INFO, "Code generated");
+                int code[] = generateCode(codeLength, gameLog);
+                gameLog.log(Level.INFO, "Code generated");
                     
 
-                    int guessCount = 1;
-                    gameLog.log(Level.INFO, "Code: " + Arrays.toString(code));
+                int guessCount = 1;
+                gameLog.log(Level.INFO, "Code: " + Arrays.toString(code));
                     
-                    while(!(inputLine = input.readLine()).equals("f"))
+                while(!(inputLine = input.readLine()).equals("f"))
+                {
+                    gameLog.log(Level.INFO, "GUESS: " + inputLine);
+                    GuessResponse newGuess = match(code, inputLine, gameLog);
+                    if(newGuess == null)
                     {
-                        gameLog.log(Level.INFO, "GUESS: " + inputLine);
-                        GuessResponse newGuess = match(code, inputLine, gameLog);
-                        if(newGuess == null)
-                        {
-                            gameLog.log(Level.INFO, "guess was to long");
-                            output.println("Guess must only contain " + codeLength + " digits");
-                            commLog.log(Level.INFO, "Guess size prompt sent to client");
-                        }
-                        else if(newGuess.correct == codeLength)
-                        {
-                            gameLog.log(Level.INFO, "Correct Guess");
-                            gameLog.log(Level.INFO, "Guess count: " + guessCount);
-                            output.println("Correct,"+guessCount);
-                            commLog.log(Level.INFO, "result sent to client");
-                            break;
-                        }
-                        else if(newGuess.correct != codeLength && guessCount > 9)
-                        {
-                            gameLog.log(Level.INFO, "Incorrect Guess Out of Guesses");
-                            gameLog.log(Level.INFO, "Guess count: " + guessCount);
-                            output.println("Incorrect,"+guessCount);
-                            commLog.log(Level.INFO, "result sent to client");
-                            break;
-                        }
-                        else
-                        {
-                            gameLog.log(Level.INFO, "Incorrect Guess Again");
-                            gameLog.log(Level.INFO, newGuess.correct + "," + newGuess.incorrect);
-                            output.println("Incorrect,"+newGuess.correct + "," + newGuess.incorrect);
-                            commLog.log(Level.INFO, "result sent to client");
-                            ++guessCount;
-                        }
+                        gameLog.log(Level.INFO, "guess was to long");
+                        output.println("Guess must only contain " + codeLength + " digits");
+                        commLog.log(Level.INFO, "Guess size prompt sent to client");
                     }
+                    else if(newGuess.correct == codeLength)
+                    {
+                        gameLog.log(Level.INFO, "Correct Guess");
+                        gameLog.log(Level.INFO, "Guess count: " + guessCount);
+                        output.println("Correct,"+guessCount);
+                        commLog.log(Level.INFO, "result sent to client");
+                        break;
+                    }
+                    else if(newGuess.correct != codeLength && guessCount > 9)
+                    {
+                        gameLog.log(Level.INFO, "Incorrect Guess Out of Guesses");
+                        gameLog.log(Level.INFO, "Guess count: " + guessCount);
+                        output.println("Incorrect,"+guessCount);
+                        commLog.log(Level.INFO, "result sent to client");
+                        break;
+                    }
+                    else
+                    {
+                        gameLog.log(Level.INFO, "Incorrect Guess Again");
+                        gameLog.log(Level.INFO, newGuess.correct + "," + newGuess.incorrect);
+                        output.println("Incorrect,"+newGuess.correct + "," + newGuess.incorrect);
+                        commLog.log(Level.INFO, "result sent to client");
+                        ++guessCount;
+                    }
+                }
+                if(inputLine.equals("f")
+                {
                     gameLog.log(Level.INFO, "Game Forfeit score 11");
                     output.println("Game Forfeit,"+11);
+                }
 
-                    output.println("End Game");
-                    commLog.log(Level.INFO, "end game sent to client");
-                    output.println("Do you wish to play again? (p)-play/(q)-quit");
-                    inputLine = input.readLine();
-                    if(inputLine.equals("q"))
-                    {
-                        output.println("close");
-                        close = true;
-                    }
-                }while(!close);
-
-                clientSocket.close();
+                output.println("End Game");
+                commLog.log(Level.INFO, "end game sent to client");
+                output.println("Do you wish to play again? (p)-play/(q)-quit");
+                inputLine = input.readLine();
+                if(inputLine.equals("q"))
+                {
+                    output.println("close");
+                    close = true;
+                }
             }
+            clientSocket.close();
         }catch(SecurityException e)
         {
             System.out.println("Security Exception error: " + e);
