@@ -14,13 +14,15 @@ class PlayerThread extends Thread
     public String name;
     public int score;
     GameMsg msg;
+    Object lock;
 
-    public PlayerThread(Socket socket, Logger commLog, GameMsg msg)
+    public PlayerThread(Socket socket, Logger commLog, GameMsg msg, Object lock)
     {
         this.clientSocket = socket;
         this.commLog = commLog;
         this.score = 1;
         this.msg = msg;
+        this.lock = lock;
     }
     @Override
     public void run()
@@ -59,7 +61,6 @@ class PlayerThread extends Thread
                     output.println("Please enter a code length");
                     commLog.log(Level.INFO, "code length promt sent to client");
                     msg.input = input.readLine();
-                    notify();
                     synchronized(this)
                     {
                         try{
@@ -68,6 +69,7 @@ class PlayerThread extends Thread
                         {
                             System.out.println("Interrupt error: " + e);
                         }
+                        this.notify();
                     }
                 }
                 while(!(inputLine = input.readLine()).equals("f"))
@@ -107,7 +109,6 @@ class PlayerThread extends Thread
     {
         msg.input = inputLine;
         commLog.log(Level.INFO, "input received from client");
-        notify();
         synchronized(this)
         {
             try{
@@ -116,6 +117,7 @@ class PlayerThread extends Thread
             {
                 System.out.println("Interrupt error: " + e);
             }
+            this.notify();
         }
         output.println(msg.output);
         commLog.log(Level.INFO, "Game result sent to client");

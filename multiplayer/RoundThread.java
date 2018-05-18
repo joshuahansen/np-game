@@ -12,12 +12,14 @@ class RoundThread extends Thread
     private Logger gameLog;
     private List<PlayerThread> players;
     GameMsg msg;
+    Object lock;
 
-    public RoundThread(List<PlayerThread> players, Logger gameLog, GameMsg msg)
+    public RoundThread(List<PlayerThread> players, Logger gameLog, GameMsg msg, Object lock)
     {
         this.players = players;
         this.gameLog = gameLog;
         this.msg = msg;
+        this.lock = lock;
     }
     @Override
     public void run()
@@ -28,17 +30,12 @@ class RoundThread extends Thread
             msg.output = "get code length";
             synchronized(players.get(0))
             {
-                try{
-                    players.get(0).notify();
-                }catch(InterruptedException e)
-                {
-                    System.out.println("Interrupt error: " + e);
-                }
+                players.get(0).notify();
             }
-            synchronized(this)
+            synchronized(players.get(0))
             {
                 try{
-                    this.wait();
+                    players.get(0).wait();
                 }catch(InterruptedException e)
                 {
                     System.out.println("Interrupt error: " + e);
@@ -56,17 +53,12 @@ class RoundThread extends Thread
             {
                 synchronized(player)
                 {
-                    try{
-                        player.notify();
-                    }catch(InterruptedException e)
-                    {
-                        System.out.println("Interrupt error: " + e);
-                    }
+                    player.notify();
                 }
-                synchronized(this)
+                synchronized(player)
                 {
                    try{
-                       this.wait();
+                       player.wait();
                    }catch(InterruptedException e)
                    {
                        System.out.println("Interrupt error: " + e);
@@ -110,12 +102,7 @@ class RoundThread extends Thread
                     }
                     synchronized(player)
                     {
-                        try{
-                            player.notify();
-                        }catch(InterruptedException e)
-                        {
-                            System.out.println("Interrupt error: " + e);
-                        }
+                        player.notify();
                     }
                 }
             }
@@ -124,12 +111,7 @@ class RoundThread extends Thread
                 msg.output = "End Game";
                 synchronized(player)
                 {
-                    try{
-                        player.notify();
-                    }catch(InterruptedException e)
-                    {
-                        System.out.println("Interrupt error: " + e);
-                    }
+                    player.notify();
                 }
             }
             endRound = true;

@@ -1,3 +1,5 @@
+package multiplayer;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -47,6 +49,8 @@ class Client
                     setCodeLength(keyboardInput, clientOutput);
                 }
                 guess(keyboardInput, clientOutput);
+                sr = getServerResponse(serverInput);
+                System.out.println(sr);
                 sr = getServerResponse(serverInput);
                 while(!"End Game".equals(sr))
                 {

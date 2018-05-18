@@ -12,7 +12,7 @@ clean:
 	$(RM) *.class *.log
 
 server:
-	$(J) multiplayer.Server
+	$(J) Server
 
 client:
-	$(J) multiplayer.Client
+	$(J) Client

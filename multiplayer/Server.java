@@ -17,6 +17,9 @@ class Server
     /**
     * main function starts server
     */
+    public static GameMsg msg = new GameMsg();
+    public static Object lock = new Object();
+    public static List<PlayerThread> players = new ArrayList<PlayerThread>();
     public static void main(String[] args)
     {
         LinkedList<PlayerThread> lobbyQueue = new LinkedList<PlayerThread>();
@@ -38,20 +41,19 @@ class Server
             ServerSocket ss = new ServerSocket(serverPort);
 
             boolean queuing = true;            
-            GameMsg msg = new GameMsg();
             while(queuing)
             {
                 Socket clientSocket = connect(ss, commLog);
-                PlayerThread newPlayer = new PlayerThread(clientSocket, commLog, msg);
+                PlayerThread newPlayer = new PlayerThread(clientSocket, commLog, msg, lock);
                 lobbyQueue.add(newPlayer);
                 newPlayer.start();
-                if(lobbyQueue.size() >= 3)
+                if(lobbyQueue.size() >= 3) //change to 3 after testing
                 {
-                    List<PlayerThread> players = new ArrayList<PlayerThread>();
+                    players.clear();
                     players.add(lobbyQueue.poll());
                     players.add(lobbyQueue.poll());
                     players.add(lobbyQueue.poll());
-                    RoundThread round = new RoundThread(players, gameLog, msg);
+                    RoundThread round = new RoundThread(players, gameLog, msg, lock);
                     round.start();
                 }
             }
