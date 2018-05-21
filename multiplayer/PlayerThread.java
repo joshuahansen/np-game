@@ -76,7 +76,6 @@ class PlayerThread extends Thread
                         {
                             System.out.println("Interrupt error: " + e);
                         }
-                        round.notify();
                     }
                     synchronized(round)
                     {

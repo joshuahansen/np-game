@@ -1,4 +1,4 @@
-package singlePlayer;
+package multiplayer;
 
 import java.io.*;
 import java.net.*;
@@ -52,7 +52,6 @@ class Client
                 {
                     setCodeLength(keyboardInput, clientOutput);
                 }
-                guess(keyboardInput, clientOutput);
                 sr = getServerResponse(serverInput);
                 //loop getting user guesses while valid turns
                 while(!"End Game".equals(sr))
