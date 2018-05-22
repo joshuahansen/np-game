@@ -41,7 +41,7 @@ class Server
             ServerSocket ss = new ServerSocket(serverPort);
 
             boolean queuing = true;
-            //continuously loop to allow clients to connect            
+            //continuously loop to allow clients to connect 
             while(queuing)
             {
                 Socket clientSocket = connect(ss, commLog);

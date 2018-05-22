@@ -68,6 +68,11 @@ class PlayerThread extends Thread
                     output.println("Please enter a code length");
                     commLog.log(Level.INFO, "code length promt sent to client");
                     msg.input = input.readLine();
+                    commLog.log(Level.INFO, "code length received from client");
+                    synchronized(round)
+                    {
+                        round.notify();
+                    }
                     synchronized(this)
                     {
                         try{
@@ -76,10 +81,6 @@ class PlayerThread extends Thread
                         {
                             System.out.println("Interrupt error: " + e);
                         }
-                    }
-                    synchronized(round)
-                    {
-                        round.notify();
                     }
                 }
                 //loop while guessing 
@@ -121,6 +122,10 @@ class PlayerThread extends Thread
     {
         msg.input = inputLine;
         commLog.log(Level.INFO, "input received from client");
+        synchronized(round)
+        {
+            round.notify();
+        }
         synchronized(this)
         {
             try{
@@ -129,10 +134,6 @@ class PlayerThread extends Thread
             {
                 System.out.println("Interrupt error: " + e);
             }
-        }
-        synchronized(round)
-        {
-            round.notify();
         }
         
         output.println(msg.output);

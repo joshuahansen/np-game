@@ -46,9 +46,12 @@ class Client
                 System.out.println(getServerResponse(serverInput));
     
                 sr = getServerResponse(serverInput);
+                String codeLength = "Please enter a code length";
+                System.out.println(sr);
+                sr = getServerResponse(serverInput);
                 System.out.println(sr);
                 //set code length
-                if(sr.equals("Please enter a code length"))
+                if(sr.equals(codeLength))
                 {
                     setCodeLength(keyboardInput, clientOutput);
                 }
