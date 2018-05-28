@@ -32,16 +32,19 @@ class PlayerThread extends Thread
     {
         this.round = thread;
     }
+    //compare player socres and return the difference
     public int compareTo(PlayerThread comparePlayer)
     {
         int compareScore = ((PlayerThread) comparePlayer).score;
 
         return this.score - compareScore;
     }
+    //print player details as a string
     public String toString()
     {
         return "Name: " + this.name + " Score: " + this.score;
     }
+    //get player score
     public int getScore()
     {
         return this.score;
@@ -57,7 +60,7 @@ class PlayerThread extends Thread
             BufferedReader input = new BufferedReader(new InputStreamReader(clientInputStream));
  
             String inputLine;
-
+            
             output.println("Please Enter your name: ");
             commLog.log(Level.INFO, "Name promt sent to client");
     
@@ -69,7 +72,7 @@ class PlayerThread extends Thread
             boolean close = false;
             //loop while client wishes to play
             while(!close)
-            {
+            {   //wait for more players to join
                 synchronized(this)
                 {
                     try{
@@ -81,6 +84,7 @@ class PlayerThread extends Thread
                         System.out.println("Interrupt error: " + e);
                     }
                 }
+                //if player is first player get code length
                 if(msg.output.equals("get code length"))
                 {
                     msg.output = "";
@@ -88,10 +92,12 @@ class PlayerThread extends Thread
                     commLog.log(Level.INFO, "code length promt sent to client");
                     msg.input = input.readLine();
                     commLog.log(Level.INFO, "code length received from client");
+                    //notify round that player has entered a code length
                     synchronized(round)
                     {
                         round.notify();
                     }
+                    //wait for code to be generated
                     synchronized(this)
                     {
                         try{
@@ -102,6 +108,7 @@ class PlayerThread extends Thread
                         }
                     }
                 }
+                //if player isn't first start the game
                 else
                 {
                     output.println("Start Game");
@@ -113,12 +120,14 @@ class PlayerThread extends Thread
                     //handle clients guess
                     gameLog.log(Level.INFO, "GUESS: " + inputLine);
                     GuessResponse newGuess = match(msg.code, inputLine, gameLog);
+                    //print prompt if guess was to long
                     if(newGuess == null)
                     {
                         gameLog.log(Level.INFO, "guess was to long");
                         output.println("Guess must only contain " + msg.codeLength + " digits");
                         commLog.log(Level.INFO, "Game result sent to client");
                     }
+                    //print correct guess prompt
                     else if(newGuess.correct == msg.codeLength)
                     {
                         gameLog.log(Level.INFO, "Correct Guess");
@@ -127,6 +136,7 @@ class PlayerThread extends Thread
                         commLog.log(Level.INFO, "Game result sent to client");
                         break;
                     }
+                    //send prompt if user is out of guesses
                     else if(newGuess.correct != msg.codeLength && this.score > 9)
                     {
                         gameLog.log(Level.INFO, "Incorrect Guess Out of Guesses");
@@ -135,6 +145,7 @@ class PlayerThread extends Thread
                         commLog.log(Level.INFO, "Game result sent to client");
                         break;
                     }
+                    //send incorrect guess prompt
                     else
                     {
                         gameLog.log(Level.INFO, "Incorrect Guess Again");
@@ -144,15 +155,16 @@ class PlayerThread extends Thread
                         commLog.log(Level.INFO, "Game result sent to client");
                     }
                 }
+                //set player score to 11 if the forfeit
                 if(inputLine.equals("f"))
                 {
                     gameLog.log(Level.INFO, "Game Forfeit score 11");
                     this.score = 11;
                     output.println("Game Forfeit,"+11);
                 }
-                //send play again/ quit prompt and handle response
                 output.println("End Game");
                 commLog.log(Level.INFO, "end game sent to client");
+                //wait for all players to finish the round
                 synchronized(this)
                 {
                     try {
@@ -163,7 +175,9 @@ class PlayerThread extends Thread
                         System.out.println("Interupt error: " + e);
                     }
                 }
+                //display round results results
                 output.println(msg.result);
+                //send play again/ quit prompt and handle response
                 output.println("Do you wish to play again? (p)-play/(q)-quit");
                 commLog.log(Level.INFO, "Prompt to play again sent to client");
                 inputLine = input.readLine();
@@ -178,9 +192,8 @@ class PlayerThread extends Thread
                 {
                     output.println("play");
                     commLog.log(Level.INFO, "Keep connection alive and play again");
-                    System.out.println("DEBUG: LobbyQueue Size: " + this.lobbyQueue.size());
+                    this.score = 1;
                     this.lobbyQueue.add(this);
-                    System.out.println("DEBUG: LobbyQueue Size: " + this.lobbyQueue.size());
                 }
             }
             this.clientSocket.close();

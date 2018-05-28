@@ -55,7 +55,7 @@ class RoundThread extends Thread
             msg.codeLength = codeLength;
 
             gameLog.log(Level.INFO, "Code: " + Arrays.toString(code));
-
+            //notify all players to start the game once code is generated
             for(PlayerThread player : players)
             {
                 synchronized(player)
@@ -63,6 +63,7 @@ class RoundThread extends Thread
                     player.notify();
                 }
             }
+            //loop to check if all players are finished and waiting
             boolean allPlayed = false;
             while(!allPlayed)
             {
@@ -75,7 +76,9 @@ class RoundThread extends Thread
                 if(count == players.size())
                     break;
             }
+            //sort the players according to score
             players.sort(Comparator.comparing(PlayerThread::getScore));
+            //generate player score board
             int place = 1;
             msg.result = "Score Board\t";
             for(PlayerThread player : players)
@@ -83,6 +86,7 @@ class RoundThread extends Thread
                 msg.result += place+". " + player.toString()+ "\t";
                 ++place;
             }
+            //notify all players that score board is complete
             for(PlayerThread player : players)
             {
                 synchronized(player)
@@ -90,6 +94,7 @@ class RoundThread extends Thread
                     player.notify();
                 }
             }
+            //end the round
             endRound = true;
         }
     }

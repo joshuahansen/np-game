@@ -37,13 +37,15 @@ class Client
             PrintWriter clientOutput = new PrintWriter(serverSocket.getOutputStream(), true);
             
             String sr = "";
+            
+            //get user name propmts and send response
+            System.out.println(getServerResponse(serverInput));
+            clientOutput.println(getUserInput(keyboardInput));
+            System.out.println(getServerResponse(serverInput));
+            
             //loop while user wishes to continue playing
             while(!sr.equals("close"))
             {
-                //get user name propmts and send response
-                System.out.println(getServerResponse(serverInput));
-                clientOutput.println(getUserInput(keyboardInput));
-                System.out.println(getServerResponse(serverInput));
    
                 //server waiting for other players 
                 sr = getServerResponse(serverInput);
