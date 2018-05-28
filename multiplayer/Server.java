@@ -42,26 +42,36 @@ class Server
 
             boolean queuing = true;
             //continuously loop to allow clients to connect 
+            long start = System.currentTimeMillis();
             while(queuing)
             {
                 Socket clientSocket = connect(ss, commLog);
                 //start a new thread to handle client
-                PlayerThread newPlayer = new PlayerThread(clientSocket, commLog, msg);
+                PlayerThread newPlayer = new PlayerThread(clientSocket, commLog, gameLog, msg, lobbyQueue);
                 //add to lobbyQueue
                 lobbyQueue.add(newPlayer);
                 newPlayer.start();
-                //start game once 3 players have connected
-                if(lobbyQueue.size() >= 3)
+                //start game once 3 players have connected or 15 seconds has passed
+                if(lobbyQueue.size() >= 3 || (System.currentTimeMillis() - start) > 15000 )
                 {
-                    players.clear();
-                    //get first 3 players
-                    players.add(lobbyQueue.poll());
-                    players.add(lobbyQueue.poll());
-                    players.add(lobbyQueue.poll());
-                    //start round
-                    RoundThread round = new RoundThread(players, gameLog, msg);
-                    round.start();
+                    start = System.currentTimeMillis();
+                    if(lobbyQueue.size() > 0)
+                    {    
+                        gameLog.log(Level.INFO, "New Round Started");
+                        players.clear();
+                        //get first 3 players
+                        for(int i = 0; i < 3; ++i)
+                        {
+                            PlayerThread player = lobbyQueue.poll();
+                            if(player != null)
+                                players.add(player);
+                        }
+                        //start round
+                        RoundThread round = new RoundThread(players, gameLog, msg);
+                        round.start();
+                    }
                 }
+                
             }
         }catch(SecurityException e)
         {

@@ -51,77 +51,50 @@ class RoundThread extends Thread
             //generate the code
             int code[] = generateCode(codeLength, gameLog);
             gameLog.log(Level.INFO, "Code generated");
+            msg.code = code;
+            msg.codeLength = codeLength;
 
             gameLog.log(Level.INFO, "Code: " + Arrays.toString(code));
-
-            //for each plaer loop getting there guesses
+            //notify all players to start the game once code is generated
             for(PlayerThread player : players)
             {
                 synchronized(player)
                 {
                     player.notify();
                 }
-                synchronized(this)
-                {
-                   try{
-                       this.wait();
-                   }catch(InterruptedException e)
-                   {
-                       System.out.println("Interrupt error: " + e);
-                   }
-                }
-                //handle clients guess
-                if(msg.input.equals("f"))
-                {
-                    gameLog.log(Level.INFO, "Game Forfeit score 11");
-                    msg.output = "Game Forfeit,"+11;
-                }
-                else
-                {
-                    gameLog.log(Level.INFO, "GUESS: " + msg.input);
-                    GuessResponse newGuess = match(code, msg.input, gameLog);
-                    if(newGuess == null)
-                    {
-                        gameLog.log(Level.INFO, "guess was to long");
-                        msg.output = "Guess must only contain " + codeLength + " digits";
-                    }
-                    else if(newGuess.correct == codeLength)
-                    {
-                        gameLog.log(Level.INFO, "Correct Guess");
-                        gameLog.log(Level.INFO, "Guess count: " + player.score);
-                        msg.output = "Correct,"+player.score;
-                        break;
-                    }
-                    else if(newGuess.correct != codeLength && player.score > 9)
-                    {
-                        gameLog.log(Level.INFO, "Incorrect Guess Out of Guesses");
-                        gameLog.log(Level.INFO, "Guess count: " + player.score);
-                        msg.output = "Incorrect,"+player.score;
-                        break;
-                    }
-                    else
-                    {
-                        gameLog.log(Level.INFO, "Incorrect Guess Again");
-                        gameLog.log(Level.INFO, newGuess.correct + "," + newGuess.incorrect);
-                        player.score++;
-                        msg.output = "Incorrect,"+newGuess.correct + "," + newGuess.incorrect    ;
-                    }
-                    //notify player thread od the game response
-                    synchronized(player)
-                    {
-                        player.notify();
-                    }
-                }
             }
-            //loop telling each player the game is over
+            //loop to check if all players are finished and waiting
+            boolean allPlayed = false;
+            while(!allPlayed)
+            {
+                int count = 0;
+                for(PlayerThread player : players)
+                {
+                    if(player.getState() == State.WAITING)
+                        count++;
+                }
+                if(count == players.size())
+                    break;
+            }
+            //sort the players according to score
+            players.sort(Comparator.comparing(PlayerThread::getScore));
+            //generate player score board
+            int place = 1;
+            msg.result = "Score Board\t";
             for(PlayerThread player : players)
             {
-                msg.output = "End Game";
+                msg.result += place+". " + player.toString()+ "\t";
+                ++place;
+            }
+            //notify all players that score board is complete
+            for(PlayerThread player : players)
+            {
                 synchronized(player)
                 {
                     player.notify();
                 }
             }
+            //end the round
             endRound = true;
         }
     }
@@ -155,22 +128,6 @@ class RoundThread extends Thread
                 return true;
         }
         return false;
-    }
-    //check if guess matches the code
-    private GuessResponse match(int[] code, String guess, Logger gameLog)
-    {
-        gameLog.log(Level.INFO, "check if guess matches code");
-        GuessResponse newGuess = new GuessResponse();
-        if(guess.length() > code.length)
-            return null;
-        for(int i = 0; i < guess.length(); ++i)
-        {
-            if(code[i] == Character.getNumericValue(guess.charAt(i)))
-                newGuess.correct++;
-            else if(inCode(Character.getNumericValue(guess.charAt(i)), code, gameLog))
-                newGuess.incorrect++;
-        }
-        return newGuess;
     }
 }
 

@@ -37,24 +37,30 @@ class Client
             PrintWriter clientOutput = new PrintWriter(serverSocket.getOutputStream(), true);
             
             String sr = "";
+            
+            //get user name propmts and send response
+            System.out.println(getServerResponse(serverInput));
+            clientOutput.println(getUserInput(keyboardInput));
+            System.out.println(getServerResponse(serverInput));
+            
             //loop while user wishes to continue playing
             while(!sr.equals("close"))
             {
-                //get user name propmts and send response
-                System.out.println(getServerResponse(serverInput));
-                clientOutput.println(getUserInput(keyboardInput));
-                System.out.println(getServerResponse(serverInput));
-    
+   
+                //server waiting for other players 
                 sr = getServerResponse(serverInput);
-                String codeLength = "Please enter a code length";
                 System.out.println(sr);
+
+                //start game or get code length
                 sr = getServerResponse(serverInput);
                 System.out.println(sr);
                 //set code length
+                String codeLength = "Please enter a code length";
                 if(sr.equals(codeLength))
                 {
                     setCodeLength(keyboardInput, clientOutput);
                 }
+                guess(keyboardInput, clientOutput);
                 sr = getServerResponse(serverInput);
                 //loop getting user guesses while valid turns
                 while(!"End Game".equals(sr))
@@ -66,9 +72,16 @@ class Client
                     }
                     sr = getServerResponse(serverInput);
                 }   
+                //waiting for other players
+                sr = getServerResponse(serverInput);
+                System.out.println(sr);
+                //display results
+                sr = getServerResponse(serverInput);
+                System.out.println(sr);
                 //get play agian/quit prompt
                 sr = getServerResponse(serverInput);
                 System.out.println(sr);
+                
                 clientOutput.println(getUserInput(keyboardInput));
                 sr = getServerResponse(serverInput);
             }
